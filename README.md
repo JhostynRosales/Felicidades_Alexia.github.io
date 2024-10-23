@@ -10,4 +10,4 @@ Este es un proyecto de ejemplo en HTML que incluye varios archivos de diseño we
 
 ## Previsualización en GitHub Pages
 
-Puedes ver la página en vivo en: [https://JhostynRosales.github.io/mi-proyecto-html/](https://JhostynRosales.github.io/mi-proyecto-html/).
+Puedes ver la página en vivo en: [https://JhostynRosales.github.io/Jhostyn2/](https://JhostynRosales.github.io/Jhostyn2/).
