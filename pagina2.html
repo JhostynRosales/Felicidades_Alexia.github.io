@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Reventar Globos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #87CEEB; /* Fondo celeste */
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .globo-juego {
+            display: inline-block;
+            width: 50px;
+            height: 70px;
+            background-color: red;
+            border-radius: 50% 50% 45% 45%;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        .globo-juego::after {
+            content: '';
+            width: 40px;
+            height: 55px;
+            background-color: rgba(255, 255, 255, 0.4);
+            position: absolute;
+            top: 8px;
+            left: 5px;
+            border-radius: 50%;
+        }
+
+        #puntaje {
+            font-size: 20px;
+            margin: 10px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+        }
+
+        #tiempo-restante {
+            font-size: 20px;
+            margin: 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+        }
+
+        #color-objetivo {
+            font-size: 20px;
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+        }
+
+        #mensaje {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            background-color: rgba(0, 128, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #startBtn {
+            margin-top: 50px;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reventar Globos</h1>
+    <div id="puntaje">Puntaje: 0</div>
+    <div id="tiempo-restante">Tiempo restante: 30</div>
+    <div id="color-objetivo">Color a explotar: <span id="color-text"></span></div>
+    <button id="startBtn">Comenzar Juego</button>
+    
+    <div id="game-container"></div>
+    <div id="mensaje">¡Bien hecho!</div>
+
+    <script>
+        let puntaje = 0;
+        let tiempoRestante = 30;
+        let tiempo;
+        const colores = ["red", "blue", "green", "yellow"]; // Colores de globos posibles
+        let colorObjetivo = "red"; // Color de globo objetivo
+        const mensaje = document.getElementById("mensaje");
+
+        // Función para mostrar el mensaje "¡Bien hecho!" temporalmente
+        function mostrarMensaje() {
+            mensaje.style.display = "block";
+            setTimeout(() => {
+                mensaje.style.display = "none";
+            }, 1000); // El mensaje desaparece después de 1 segundo
+        }
+
+        // Función para generar globos en posiciones aleatorias
+        function crearGlobo(color) {
+            const globo = document.createElement("div");
+            globo.classList.add("globo-juego");
+            globo.style.backgroundColor = color;
+
+            // Posiciones aleatorias en el contenedor
+            const maxWidth = window.innerWidth - 60; // 60 para compensar el ancho del globo
+            const maxHeight = window.innerHeight - 90; // 90 para compensar la altura del globo
+            const randomX = Math.floor(Math.random() * maxWidth);
+            const randomY = Math.floor(Math.random() * maxHeight);
+            globo.style.left = randomX + "px";
+            globo.style.top = randomY + "px";
+            
+            // Evento al hacer clic en el globo
+            globo.addEventListener("click", function() {
+                if (color === colorObjetivo) {
+                    puntaje++;
+                    document.getElementById("puntaje").innerText = "Puntaje: " + puntaje;
+                    mostrarMensaje(); // Mostrar "¡Bien hecho!" al reventar el globo correcto
+                }
+                globo.remove(); // Elimina el globo después de hacer clic
+            });
+
+            // Añadir el globo al contenedor
+            document.getElementById("game-container").appendChild(globo);
+
+            // Desaparecer el globo si no es explotado en 5 segundos
+            setTimeout(() => {
+                if (document.getElementById("game-container").contains(globo)) {
+                    globo.remove();
+                }
+            }, 5000); // Desaparece después de 5 segundos
+        }
+
+        // Función para comenzar el juego
+        function comenzarJuego() {
+            puntaje = 0;
+            tiempoRestante = 30;
+            document.getElementById("puntaje").innerText = "Puntaje: " + puntaje;
+            document.getElementById("tiempo-restante").innerText = "Tiempo restante: " + tiempoRestante;
+            
+            // Mostrar color objetivo
+            colorObjetivo = colores[Math.floor(Math.random() * colores.length)];
+            document.getElementById("color-text").innerText = colorObjetivo;
+
+            tiempo = setInterval(() => {
+                if (tiempoRestante > 0) {
+                    tiempoRestante--;
+                    document.getElementById("tiempo-restante").innerText = "Tiempo restante: " + tiempoRestante;
+                } else {
+                    clearInterval(tiempo);
+                    finalizarJuego();
+                }
+            }, 1000);
+
+            generarGlobos();
+        }
+
+        // Función para generar globos aleatoriamente cada cierto tiempo
+        function generarGlobos() {
+            const intervaloGlobos = setInterval(() => {
+                if (tiempoRestante > 0) {
+                    const colorAleatorio = colores[Math.floor(Math.random() * colores.length)];
+                    crearGlobo(colorAleatorio);
+                } else {
+                    clearInterval(intervaloGlobos);
+                }
+            }, 1000); // Generar un globo cada segundo
+        }
+
+        // Función para finalizar el juego, limpiar la pantalla y reiniciar puntos
+        function finalizarJuego() {
+            alert("¡Juego terminado! Tu puntaje es: " + puntaje);
+            // Limpiar los globos del contenedor
+            const gameContainer = document.getElementById("game-container");
+            while (gameContainer.firstChild) {
+                gameContainer.removeChild(gameContainer.firstChild);
+            }
+            // Reiniciar puntaje y tiempo
+            puntaje = 0;
+            tiempoRestante = 30;
+            document.getElementById("puntaje").innerText = "Puntaje: " + puntaje;
+            document.getElementById("tiempo-restante").innerText = "Tiempo restante: " + tiempoRestante;
+        }
+
+        // Comenzar juego al hacer clic en el botón
+        document.getElementById("startBtn").addEventListener("click", comenzarJuego);
+    </script>
+</body>
+</html>
